@@ -27,7 +27,6 @@ export default function Home() {
 		contract = new web3.eth.Contract(abi, contractAddress);
 
 		contract.methods.taskCount().call().then(setTaskCount);
-		console.log(await contract.methods.tasks(1).call());
 
 		// Loops through tasks to save to state and render to page.
 		// for (let i = 1; i < taskCount; i++) {
@@ -45,10 +44,26 @@ export default function Home() {
 		// }
 	};
 
+	async function getTasks() {
+		for (let i = 1; i < taskCount; i++) {
+			const result = await contract.methods.tasks(i).call();
+			setTasks(prev => [...prev, result]);
+		}
+	}
+
 	async function createTask(e) {
 		if (e.key === 'Enter') {
 			const result = await contract.methods
 				.createTask(e.target.value)
+				.send({ from: account });
+			getTasks();
+		}
+	}
+
+	async function completeTask({ target }) {
+		if (target.checked) {
+			const result = await contract.methods
+				.completeTask(target.name, true)
 				.send({ from: account });
 			console.log(result);
 		}
@@ -57,7 +72,20 @@ export default function Home() {
 	return (
 		<>
 			<button onClick={ethEnabled}>Connect to MetaMask</button>
+			<button onClick={getTasks}>Get Tasks</button>
+			{tasks.map(todo => {
+				const { id, content, completed } = todo;
+				return (
+					<div key={id}>
+						<p>Todo ID: {id}</p>
+						<p>{content}</p>
+						<input type="checkbox" name={id} onClick={completeTask} />
+					</div>
+				);
+			})}
+
 			<input type="text" onKeyPress={e => createTask(e)} />
+			<p>{taskCount}</p>
 		</>
 	);
 }
