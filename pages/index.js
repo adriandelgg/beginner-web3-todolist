@@ -27,21 +27,6 @@ export default function Home() {
 		contract = new web3.eth.Contract(abi, contractAddress);
 
 		contract.methods.taskCount().call().then(setTaskCount);
-
-		// Loops through tasks to save to state and render to page.
-		// for (let i = 1; i < taskCount; i++) {
-		// 	contract.methods
-		// 		.tasks(i)
-		// 		.call()
-		// 		.then(task =>
-		// 			setTasks(prev => {
-		// 				console.log(prev);
-		// 				prev.push(task);
-		// 				console.log(tasks);
-		// 			})
-		// 		)
-		// 		.catch(console.log);
-		// }
 	};
 
 	async function getTasks() {
@@ -56,7 +41,6 @@ export default function Home() {
 			const result = await contract.methods
 				.createTask(e.target.value)
 				.send({ from: account });
-			getTasks();
 		}
 	}
 
@@ -65,7 +49,7 @@ export default function Home() {
 			const result = await contract.methods
 				.completeTask(target.name, true)
 				.send({ from: account });
-			console.log(result);
+			console.log(result); // Receipt
 		}
 	}
 
